@@ -32,3 +32,6 @@ choose_best(NextList, Goal, Visited, Path) :-
     sort(HeuristicList, SortedHeuristicList),
     nth0(0, SortedHeuristicList, [_, NextNode]),
     best_first_search(NextNode, Goal, Visited, Path).
+
+
+best_first_search(a, f, path).
