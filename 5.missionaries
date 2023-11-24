@@ -1,0 +1,46 @@
+def is_valid(state):
+    m_left, c_left, b_left, m_right, c_right, b_right = state
+    # Check if the state is valid
+    if 0 <= m_left <= 3 and 0 <= c_left <= 3 and 0 <= b_left <= 1 and 0 <= m_right <= 3 and 0 <= c_right <= 3 and 0 <= b_right <= 1:
+        # Check if missionaries outnumbered by cannibals on either side
+        if m_left < c_left and m_left > 0:
+            return False
+        if m_right < c_right and m_right > 0:
+            return False
+        return True
+    return False
+
+def goal_state(state):
+    # Check if the goal state is reached
+    return state == (0, 0, 0, 3, 3, 1)
+
+def get_next_states(state):
+    m_left, c_left, b_left, m_right, c_right, b_right = state
+    next_states = []
+    possible_moves = [(1, 0), (2, 0), (0, 1), (0, 2), (1, 1)]
+    
+    for m, c in possible_moves:
+        if b_left == 1:
+            new_state = (m_left - m, c_left - c, b_left - 1, m_right + m, c_right + c, b_right + 1)
+        else:
+            new_state = (m_left + m, c_left + c, b_left + 1, m_right - m, c_right - c, b_right - 1)
+
+        if is_valid(new_state):
+            next_states.append(new_state)
+    
+    return next_states
+
+def dfs(current_state, path):
+    if goal_state(current_state):
+        print("Solution found:", path)
+        return True
+    
+    for next_state in get_next_states(current_state):
+        if next_state not in path:
+            if dfs(next_state, path + [next_state]):
+                return True
+    return False
+
+# Initial state: (missionaries_left, cannibals_left, boat_left, missionaries_right, cannibals_right, boat_right)
+initial_state = (3, 3, 1, 0, 0, 0)
+dfs(initial_state, [initial_state])
