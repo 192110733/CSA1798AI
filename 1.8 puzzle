@@ -1,55 +1,96 @@
-print("8 puzzle")
-import heapq
-goal_state = (1, 2, 3, 8, 0, 4, 7, 6, 5)
-initial_state = (2, 8, 3, 1, 6, 4, 7, 0, 5)
-def manhattan_distance(state):
-    distance = 0
+def print_in_format(matrix):
+    for i in range(9):
+        if i % 3 == 0 and i > 0:
+            print("")
+        print(str(matrix[i]) + " ", end="")
+
+def count(s):
+    c = 0
+    ideal = [1, 2, 3,
+             4, 5, 6,
+             7, 8, 0]
+    for i in range(9):
+        if s[i] != 0 and s[i] != ideal[i]:
+            c += 1
+    return c
+
+def calculate_manhattan_distance(position, target_position):
+    x1, y1 = divmod(position, 3)
+    x2, y2 = divmod(target_position, 3)
+    return abs(x1 - x2) + abs(y1 - y2)
+
+def calculate_total_manhattan_distance(state):
+    total_distance = 0
     for i in range(9):
         if state[i] != 0:
-            goal_row = (state[i] - 1) // 3
-            goal_col = (state[i] - 1) % 3
-            curr_row = i // 3
-            curr_col = i % 3
-            distance += abs(goal_row - curr_row) + abs(goal_col - curr_col)
-    return distance
-def generate_moves(state):
-    moves = []
-    empty_index = state.index(0)
-    if empty_index - 3 >= 0:
-        moves.append(empty_index - 3)
-    if empty_index + 3 < 9:
-        moves.append(empty_index + 3)
-    if empty_index % 3 != 0:
-        moves.append(empty_index - 1)
-    if (empty_index + 1) % 3 != 0:
-        moves.append(empty_index + 1)
-    return moves
-def solve_puzzle(initial_state):
-    open_set = [(manhattan_distance(initial_state), initial_state)]
-    heapq.heapify(open_set)
-    closed_set = set()
-    parent_map = {initial_state: None}
-    while open_set:
-        _, current_state = heapq.heappop(open_set)
-        if current_state == goal_state:
-            path = []
-            while current_state is not None:
-                path.insert(0, current_state)
-                current_state = parent_map[current_state]
-            return path
-        closed_set.add(current_state)
-        moves = generate_moves(current_state)
-        for move in moves:
-            new_state = list(current_state)
-            new_state[current_state.index(0)], new_state[move] = new_state[move], new_state[current_state.index(0)]
-            new_state = tuple(new_state)
-            if new_state not in closed_set:
-                if (manhattan_distance(new_state), new_state) not in open_set:
-                    heapq.heappush(open_set, (manhattan_distance(new_state), new_state))
-                    parent_map[new_state] = current_state
-solution_path = solve_puzzle(initial_state)
-for step, state in enumerate(solution_path):
-    print(f"Step {step}:")
-    for i in range(0, 9, 3):
-        print(state[i:i+3])
-        print()
+            total_distance += calculate_manhattan_distance(i, state[i] - 1)
+    return total_distance
+
+def move(ar, p, st):
+    rh = 999
+    cost = 0
+    store_st = st.copy()
+    for i in range(len(ar)):
+        dupl_st = st.copy()
+        temp = dupl_st[p]
+        dupl_st[p] = dupl_st[ar[i]]
+        dupl_st[ar[i]] = temp
+        tmp_rh = count(dupl_st)
+        tmp_cost = calculate_total_manhattan_distance(dupl_st)
+        if tmp_rh < rh:
+            rh = tmp_rh
+            cost = tmp_cost
+            store_st = dupl_st.copy()
+    return store_st, rh, cost
+
+state = [1, 2, 3,
+         0, 5, 6,
+         4, 7, 8]
+h = count(state)
+cost = calculate_total_manhattan_distance(state)
+total_cost = cost
+Level = 1
+
+print("\n------ Level " + str(Level) + " ------")
+print_in_format(state)
+print("\nHeuristic Value(Misplaced) : " + str(h))
+print("Cost (Manhattan distance) : " + str(cost))
+
+while h > 0:
+    pos = int(state.index(0))
+    Level += 1
+    if pos == 0:
+        arr = [1, 3]
+        state, h, cost = move(arr, pos, state)
+    elif pos == 1:
+        arr = [0, 2, 4]
+        state, h, cost = move(arr, pos, state)
+    elif pos == 2:
+        arr = [1, 5]
+        state, h, cost = move(arr, pos, state)
+    elif pos == 3:
+        arr = [0, 4, 6]
+        state, h, cost = move(arr, pos, state)
+    elif pos == 4:
+        arr = [1, 3, 5, 7]
+        state, h, cost = move(arr, pos, state)
+    elif pos == 5:
+        arr = [2, 4, 8]
+        state, h, cost = move(arr, pos, state)
+    elif pos == 6:
+        arr = [3, 7]
+        state, h, cost = move(arr, pos, state)
+    elif pos == 7:
+        arr = [4, 6, 8]
+        state, h, cost = move(arr, pos, state)
+    elif pos == 8:
+        arr = [5, 6]
+        state, h, cost = move(arr, pos, state)
+
+    total_cost += cost
+    print("\n------ Level " + str(Level) + " ------")
+    print_in_format(state)
+    print("\nHeuristic Value(Misplaced) : " + str(h))
+    print("Cost (Manhattan distance) : " + str(cost))
+
+print("\nTotal Cost : " + str(total_cost))
